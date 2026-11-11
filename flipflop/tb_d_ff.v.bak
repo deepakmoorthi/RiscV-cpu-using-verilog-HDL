@@ -1,0 +1,65 @@
+`timescale 1ns/1ps
+
+module tb_d_ff;
+
+    // Testbench signals
+    reg  clk;
+    reg  rst;
+    reg  d;
+    wire q;
+
+    // Instantiate the DUT
+    d_ff dut (
+        .clk (clk),
+        .rst (rst),
+        .d   (d),
+        .q   (q)
+    );
+
+    // Clock generation: 10 ns period (100 MHz)
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    // Stimulus
+    initial begin
+        // Initialize
+        rst = 1;
+        d   = 0;
+        
+        // Hold reset for some time
+        #20;
+        rst = 0;
+
+        // Apply stimulus
+        #10; d = 1;
+        #20; d = 0;
+        #15; d = 1;
+        #25; d = 0;
+        #10; d = 1;
+
+        // Apply reset again in the middle
+        #12; rst = 1;
+        #20; rst = 0;
+
+        #30; d = 0;
+        #20; d = 1;
+
+        // Finish simulation
+        #50;
+        $finish;
+    end
+
+    // Monitor
+    initial begin
+        $monitor("Time = %0t | rst = %b | d = %b | q = %b", $time, rst, d, q);
+    end
+
+    // Optional: dump waves for GTKWave / ModelSim
+    initial begin
+        $dumpfile("d_ff.vcd");
+        $dumpvars(0, tb_d_ff);
+    end
+
+endmodule
